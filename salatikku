@@ -1,0 +1,25 @@
+# /bin/sh
+
+UUID="8dbbc376-00ce-423b-bfe8-c6fabfd21f9d"
+NAME="salatikku"
+MOUNTPOINT="/mnt/salatikku"
+
+
+if grep -qs "$MOUNTPOINT" /proc/mounts ; then
+	set -xe;
+	sudo umount "$MOUNTPOINT";
+	sudo cryptsetup luksClose "$NAME";
+	set +xe;
+	echo "Device $NAME may now be ejected";	
+else
+	if [ -e "/dev/disk/by-uuid/$UUID" ] ; then
+		set -xe;
+		sudo cryptsetup luksOpen "/dev/disk/by-uuid/$UUID" "$NAME";
+		sudo mount "/dev/mapper/$NAME" "$MOUNTPOINT";
+		set +xe;
+		echo "Device $NAME mounted on $MOUNTPOINT"
+	else
+		echo "Device $NAME not present";
+	fi		
+fi
+
